@@ -1,10 +1,12 @@
-import streamlit as st
-from PIL import Image
-
-from keras import models
-model: models.Sequential = models.load_model("src/model_file/model.keras")
-
 import numpy as np
+import streamlit as st
+
+from PIL import Image
+from keras import models
+
+import time
+
+model: models.Sequential = models.load_model("model_file/model.keras")
 image_shape = (768, 512, 3)
 
 def show_model():
@@ -36,13 +38,24 @@ def show_model():
         with Image.open(uploaded_file) as pil_image:
             #st.image(image, caption="Uploaded image.")
 
+            global prediction
+
             with st.spinner("Processing the image..."):
                 resized_image = pil_image.resize((image_shape[0], image_shape[1]))
+
+                if resized_image.mode != "RGB":
+                    resized_image = resized_image.convert('RGB')
+
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
 
                 reshaped_image_array = np.expand_dims(np_image.transpose((1,0,2)), axis=0)
                 prediction = model.predict(x=reshaped_image_array)
-                
-                st.success(body="Completed.", icon="✅")
-                st.write(f"{prediction[0][0]} and {prediction[0][1]}")
+                time.sleep(2)
+
+            success_placeholder = st.empty()
+            success_placeholder.success(body="Completed.", icon="✅")
+            
+            with st.spinner("Visualizing results..."):
+                time.sleep(2)
+                success_placeholder.empty()
