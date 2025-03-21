@@ -62,3 +62,15 @@ def show_model():
             with st.spinner("Visualizing results..."):
                 time.sleep(2)
                 success_placeholder.empty()
+
+            prob_not_ai = prediction[0][0]
+            prob_ai = prediction[0][1]
+            delta = prob_not_ai - prob_ai
+            text = ""
+
+            if delta > 0:
+                text = "### :green[It is likely not A.I-generated.]"
+            elif delta < 0:
+                text = "### :red[It is likely A.I-generated.]"
+            
+            st.write(text)
