@@ -1,2 +1,0 @@
-streamlit>=1.43.0
-streamlit-navigation-bar>=3.3.0
