@@ -1,2 +1,2 @@
 streamlit>=1.43.0
-streamlit-community-navigation-bar>=3.3.0
+streamlit-community-navigation-bar>=4.6.1
