@@ -9,10 +9,11 @@ import pages as pg
 
 st.set_page_config(initial_sidebar_state="collapsed")
 
-pages = ["Home", "Github"]
+pages = ["Home", "Model", "Github"]
 
 functions = {
     "Home": pg.show_home,
+    "Model": pg.show_model
 }
 options = {
     "show_menu": False,
