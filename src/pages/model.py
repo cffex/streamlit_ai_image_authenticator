@@ -6,7 +6,7 @@ from keras import models
 
 import time
 
-model: models.Sequential = models.load_model("model_file/model.keras")
+model: models.Sequential = models.load_model("src/model_file/model.keras")
 image_shape = (768, 512, 3)
 
 def show_model():
@@ -16,6 +16,7 @@ def show_model():
         This is a **Convolutional Neural Network (C.N.N)** that processes images.
         """
     )
+    st.divider()
 
     st.header("Clarification ℹ️")
     st.write(
@@ -24,9 +25,11 @@ def show_model():
         \nThe file size should be: (width, height) = (768, 512) *(This is optional, but works best as the model was trained on this particular dimension)*
         """
     )
+    st.divider()
 
     st.header("Usage 🔧")
     st.write("Simply upload an image and the model will do the analysis.")
+    st.divider()
 
     ##
     ##
