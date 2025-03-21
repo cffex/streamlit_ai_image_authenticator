@@ -10,6 +10,7 @@ def show_home():
         This is an interactive website where you gain access to a **Convolutional Neural Network (C.N.N)**. Its job is to process images then evaluate whether or not they are *likely* to be A.I-generated.
         """
     )
+    st.divider()
 
     st.header("Why? 🤔")
     st.write(
@@ -18,6 +19,7 @@ def show_home():
         \nNot only was this project created to mitigate such occurences (fake images), but also to challenge myself with my abilities.
         """
     )
+    st.divider()
 
     st.header("Where can I start using the model? 😵‍💫")
     st.write(
@@ -25,5 +27,4 @@ def show_home():
         There is a navigation bar at the top of the page, where many buttons are to be found. Simply clicking them will allow you to move through the website.
         """
     )
-
     st.divider()
