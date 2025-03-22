@@ -10,12 +10,7 @@ model: models.Sequential = models.load_model("src/model_file/model.keras")
 image_shape = (768, 512, 3)
 
 def show_model():
-    st.header("Description 📝")
-    st.write(
-        """
-        This is a **Convolutional Neural Network (C.N.N)** that processes images.
-        """
-    )
+    st.title("Model 🤖")
     st.divider()
 
     st.header("Clarification ℹ️")
