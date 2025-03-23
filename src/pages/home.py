@@ -21,10 +21,12 @@ def show_home():
     )
     st.divider()
 
-    st.header("Where can I start using the model? 😵‍💫")
+    st.header("Clarification ℹ️")
     st.write(
         """
-        There is a navigation bar at the top of the page, where many buttons are to be found. Simply clicking them will allow you to move through the website.
+        When you upload an image:
+        \n-  The file type should be: PNG, JPEG, JPG.
+        \n-  The file size should be: (width, height) = (768, 512) *(This is optional, but works best as the model was trained on this particular dimension)*
         """
     )
     st.divider()

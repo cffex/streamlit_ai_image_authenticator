@@ -7,7 +7,9 @@ import pages as pg
 ###
 ###
 
-st.set_page_config(initial_sidebar_state="collapsed")
+st.set_page_config(
+    initial_sidebar_state="collapsed",
+    layout="wide")
 
 pages = ["Home", "Model", "Github"]
 
