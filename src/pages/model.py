@@ -3,7 +3,6 @@ import streamlit as st
 
 from PIL import Image
 from keras import models
-
 import time
 
 model: models.Sequential = models.load_model("src/model_file/model.keras")
@@ -13,22 +12,9 @@ def show_model():
     st.title("Model 🤖")
     st.divider()
 
-    st.header("Clarification ℹ️")
-    st.write(
-        """
-        The file type should be: PNG, JPEG, JPG.
-        \nThe file size should be: (width, height) = (768, 512) *(This is optional, but works best as the model was trained on this particular dimension)*
-        """
-    )
-    st.divider()
-
     st.header("Usage 🔧")
     st.write("Simply upload an image and the model will do the analysis.")
     st.divider()
-
-    ##
-    ##
-    ##
 
     uploaded_file = st.file_uploader("Choose an image file", type=["png", "jpeg", "jpg"])
 
@@ -44,11 +30,15 @@ def show_model():
                 if resized_image.mode != "RGB":
                     resized_image = resized_image.convert('RGB')
 
+                np_image_unprocessed = np.array(resized_image)
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
 
                 reshaped_image_array = np.expand_dims(np_image.transpose((1,0,2)), axis=0)
                 prediction = model.predict(x=reshaped_image_array)
+
+                a = cnn_manim.create_anim(input_arr=np_image_unprocessed)
+                a.render()
                 time.sleep(2)
 
             success_placeholder = st.empty()
