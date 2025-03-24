@@ -56,5 +56,6 @@ def show_model():
 
             print(prob_not_ai, "not ai")
             print(prob_ai, "ai")
+            print(delta, "delta")
             
             st.write(text)
