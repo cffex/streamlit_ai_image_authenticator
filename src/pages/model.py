@@ -30,7 +30,6 @@ def show_model():
                 if resized_image.mode != "RGB":
                     resized_image = resized_image.convert('RGB')
 
-                np_image_unprocessed = np.array(resized_image)
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
 
