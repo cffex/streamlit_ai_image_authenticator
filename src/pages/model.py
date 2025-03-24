@@ -53,5 +53,8 @@ def show_model():
                 text = "### :green[It is likely not A.I-generated.]"
             elif delta < 0:
                 text = "### :red[It is likely A.I-generated.]"
+
+            print(prob_not_ai, "not ai")
+            print(prob_ai, "ai")
             
             st.write(text)
