@@ -36,9 +36,6 @@ def show_model():
 
                 reshaped_image_array = np.expand_dims(np_image.transpose((1,0,2)), axis=0)
                 prediction = model.predict(x=reshaped_image_array)
-
-                a = cnn_manim.create_anim(input_arr=np_image_unprocessed)
-                a.render()
                 time.sleep(2)
 
             success_placeholder = st.empty()
