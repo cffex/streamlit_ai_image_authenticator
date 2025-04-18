@@ -1,10 +1,14 @@
 import streamlit as st
 import numpy as np
-import keras
+import tensorflow as tf
 
 from PIL import Image
 
-model = keras.models.load_model("src/model_file/model_quantized.tflite")
+interpreter = tf.lite.Interpreter(model_path="src/model_file/model_quantized.tflite")
+interpreter.allocate_tensors()
+
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 def render_home():
     st.set_page_config(
@@ -39,7 +43,7 @@ def render_home():
                 st.image(pil_image, caption="Uploaded Image", use_container_width=True)
 
             st.success("Image uploaded successfully!")
-            
+
             with st.spinner("Processing the image..."):
                 resized_image = pil_image.resize((224, 224))
 
@@ -49,8 +53,11 @@ def render_home():
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
 
-                reshaped_image_array = np.expand_dims(np_image.transpose((1,0,2)), axis=0)
-                prediction = model.predict(x=reshaped_image_array)
+                input_data = np.expand_dims(np_image.transpose((1, 0, 2)), axis=0).astype(np.float32)
+                interpreter.set_tensor(input_details[0]['index'], input_data)
+                interpreter.invoke()
+
+                prediction = interpreter.get_tensor(output_details[0]['index'])
 
                 non_ai_prob = prediction[0][0]
                 ai_prob = prediction[0][1]
@@ -61,7 +68,7 @@ def render_home():
                     text = "### :green[It is likely not A.I-generated.]"
                 elif delta < 0:
                     text = "### :red[It is likely A.I-generated.]"
-                
+
                 st.markdown(text)
                 st.write(f"Probability of not A.I-generated: {non_ai_prob*100:.2f}%")
                 st.write(f"Probability of A.I-generated: {ai_prob*100:.2f}%")
