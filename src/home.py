@@ -4,7 +4,7 @@ import keras
 
 from PIL import Image
 
-model = keras.models.load_model("src/model_file/model.keras")
+model = keras.models.load_model("src/model_file/model_1.keras")
 
 def render_home():
     st.set_page_config(
