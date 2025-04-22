@@ -2,7 +2,11 @@ import streamlit as st
 import numpy as np
 import tensorflow as tf
 import pandas as pd
+import matplotlib.pyplot as plt
+
+from lime import lime_image
 from PIL import Image
+from skimage.segmentation import mark_boundaries
 
 ###
 ### Model loading
@@ -21,6 +25,31 @@ except Exception as e:
     st.error(f"Error: Failed to load the model.")
     st.error(f"Details: {e}")
     st.stop()
+
+###
+### Lime predict
+###
+
+def predict_func(images: np.ndarray):
+    if images.dtype == np.uint8:
+        images = images.astype(np.float32) / 255.0
+    else:
+        images = np.clip(images, 0.0, 1.0).astype(np.float32)
+
+    predictions = []
+
+    for image in images:
+        input_data = np.expand_dims(image, axis=0).astype(np.float32)
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+        prediction = interpreter.get_tensor(output_details[0]['index'])
+        predictions.append(prediction[0])
+
+    return np.array(predictions)
+
+###
+### Streamlit app
+###
 
 def render_home():
     st.set_page_config(
@@ -60,6 +89,9 @@ def render_home():
 
                 if resized_image.mode != "RGB":
                     resized_image = resized_image.convert('RGB')
+                
+                np_image_uint8 = np.array(resized_image).astype("uint8")
+                np_image_uint8 = np.clip(np_image_uint8, 0, 255).astype("uint8")
 
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
@@ -74,16 +106,19 @@ def render_home():
                 interpreter.invoke()
                 prediction = interpreter.get_tensor(output_details[0]['index'])
 
-                # Assuming output structure is [prob_non_ai, prob_ai]
+                # Output structure is [prob_non_ai, prob_ai]
                 non_ai_prob = prediction[0][0]
                 ai_prob = prediction[0][1]
+
                 delta = non_ai_prob - ai_prob
+                predicted_class_index = 1 if delta < 0 else 0
+                predicted_class_name = "AI-Generated" if predicted_class_index == 1 else "Not AI-Generated"
                 text = ""
 
-                if delta >= 0:
-                    text = "### :green[Prediction: Likely not AI-Generated]"
+                if predicted_class_index == 0:
+                    text = f"### :green[Prediction: Likely {predicted_class_name}]"
                 else:
-                    text = "### :red[Prediction: Likely AI-Generated]"
+                    text = f"### :red[Prediction: Likely {predicted_class_name}]"
 
                 st.markdown("---")
                 st.markdown("### Results")
@@ -91,7 +126,7 @@ def render_home():
                 st.write(f"Probability of **Not AI-Generated**: {non_ai_prob*100:.2f}%")
                 st.write(f"Probability of **AI-Generated**: {ai_prob*100:.2f}%")
 
-                st.markdown("### Probability Visualization")
+                st.markdown("### Probability Overview")
                 chart_data = pd.DataFrame(
                     {
                         "Probability": [non_ai_prob, ai_prob]
@@ -99,6 +134,44 @@ def render_home():
                     index=["Not AI-Generated", "AI-Generated"]
                 )
                 st.bar_chart(chart_data, height=300)
+            
+            st.markdown("---")
+            st.markdown("### Characteristics")
+            st.write("The image below shows the characteristics of the image that contributed to the model's prediction.")
+            st.write("Shows image regions influencing the prediction, with segment boundaries.")
+            st.write(":green[Green areas]: support the prediction shown above.")
+            st.write(":red[Red areas]: oppose the prediction shown above (support the other class).")
+
+            with st.spinner("Visualizing explanation..."):
+                lime_explainer = lime_image.LimeImageExplainer(random_state=42)
+                explanation = lime_explainer.explain_instance(
+                    np_image_uint8,
+                    predict_func,
+                    top_labels=2,
+                    hide_color=0,
+                    num_samples=512
+                )
+
+                predicted_class_index = 1 if ai_prob > non_ai_prob else 0
+
+                temp, mask = explanation.get_image_and_mask(
+                    predicted_class_index,
+                    positive_only=False,
+                    num_features=10,
+                    hide_rest=False
+                )
+
+                if temp.dtype == np.uint8:
+                    temp_float = temp.astype(float) / 255.0
+                else:
+                    temp_float = np.clip(temp, 0.0, 1.0)
+
+                marked_image = mark_boundaries(temp_float, mask, color=(1,0,1), mode='outer')
+                st.image(marked_image, caption="LIME Explanation", use_container_width=True)
+
+###
+### Main
+###
 
 if __name__ == "__main__":
     render_home()
