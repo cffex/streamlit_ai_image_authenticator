@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import tensorflow as tf
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from lime import lime_image
 from PIL import Image

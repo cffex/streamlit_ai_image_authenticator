@@ -1,6 +1,8 @@
 streamlit
-streamlit-community-navigation-bar
 Pillow
 tensorflow
 keras
 numpy
+lime
+pandas
+scikit-learn
