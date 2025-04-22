@@ -1,14 +1,26 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
-
+import pandas as pd
 from PIL import Image
 
-interpreter = tf.lite.Interpreter(model_path="src/model_file/model_quantized.tflite")
-interpreter.allocate_tensors()
+###
+### Model loading
+###
 
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+interpreter = None
+input_details = None
+output_details = None
+
+try:
+    interpreter = tf.lite.Interpreter(model_path="src/model_file/model_quantized.tflite")
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+except Exception as e:
+    st.error(f"Error: Failed to load the model.")
+    st.error(f"Details: {e}")
+    st.stop()
 
 def render_home():
     st.set_page_config(
@@ -16,7 +28,7 @@ def render_home():
         page_icon="🤖",
     )
 
-    st.write("# AI Image Authenticator")
+    st.markdown("<h1 style='text-align: center; font-size: 48px;'>AI Image Classificator</h1>", unsafe_allow_html=True)
 
     with st.expander("Description", expanded=True):
         st.write(
@@ -29,12 +41,11 @@ def render_home():
             """
             1. Upload an image file in PNG or JPEG format.
             2. The model will process the image and provide a prediction.
-            3. The result will indicate whether the image is likely to be A.I.-generated or not, along with the probabilities (how likely a prediction is).
+            3. The result will indicate whether the image is likely to be A.I.-generated or not, along with the probabilities shown numerically and visually.
             """
         )
 
     uploader = st.file_uploader("Choose an image file", type=["png", "jpeg", "jpg"])
-
     st.divider()
 
     if uploader is not None:
@@ -53,25 +64,41 @@ def render_home():
                 np_image = np.array(resized_image).astype("float32")
                 np_image /= 255.0
 
-                input_data = np.expand_dims(np_image.transpose((1, 0, 2)), axis=0).astype(np.float32)
+                # WHC:
+                # input_data = np.expand_dims(np_image.transpose((1, 0, 2)), axis=0).astype(np.float32)
+
+                # Standard HWC:
+                input_data = np.expand_dims(np_image, axis=0).astype(np.float32)
+
                 interpreter.set_tensor(input_details[0]['index'], input_data)
                 interpreter.invoke()
-
                 prediction = interpreter.get_tensor(output_details[0]['index'])
 
+                # Assuming output structure is [prob_non_ai, prob_ai]
                 non_ai_prob = prediction[0][0]
                 ai_prob = prediction[0][1]
                 delta = non_ai_prob - ai_prob
                 text = ""
 
                 if delta >= 0:
-                    text = "### :green[It is likely not A.I-generated.]"
-                elif delta < 0:
-                    text = "### :red[It is likely A.I-generated.]"
+                    text = "### :green[Prediction: Likely not AI-Generated]"
+                else:
+                    text = "### :red[Prediction: Likely AI-Generated]"
 
+                st.markdown("---")
+                st.markdown("### Results")
                 st.markdown(text)
-                st.write(f"Probability of not A.I-generated: {non_ai_prob*100:.2f}%")
-                st.write(f"Probability of A.I-generated: {ai_prob*100:.2f}%")
+                st.write(f"Probability of **Not AI-Generated**: {non_ai_prob*100:.2f}%")
+                st.write(f"Probability of **AI-Generated**: {ai_prob*100:.2f}%")
 
+                st.markdown("### Probability Visualization")
+                chart_data = pd.DataFrame(
+                    {
+                        "Probability": [non_ai_prob, ai_prob]
+                    },
+                    index=["Not AI-Generated", "AI-Generated"]
+                )
+                st.bar_chart(chart_data, height=300)
 
-render_home()
+if __name__ == "__main__":
+    render_home()
