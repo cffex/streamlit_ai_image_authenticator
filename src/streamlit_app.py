@@ -71,6 +71,9 @@ def render_home():
             3. The result will indicate whether the image is likely to be A.I.-generated or not, along with visualizations for detailed evaluations.
             """
         )
+    
+    with st.expander("Credits", expanded=False):
+        st.write(f"Dataset 1 (90% - 95%) : https://www.kaggle.com/datasets/alessandrasala79/ai-vs-human-generated-dataset?select=train_data")
 
     uploader = st.file_uploader("Choose an image file", type=["png", "jpeg", "jpg"])
     st.divider()
