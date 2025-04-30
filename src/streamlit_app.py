@@ -3,9 +3,7 @@ import numpy as np
 import tensorflow as tf
 import pandas as pd
 
-from lime import lime_image
 from PIL import Image
-from skimage.segmentation import mark_boundaries
 
 ###
 ### Model loading
@@ -134,46 +132,6 @@ def render_home():
                     index=["Not AI-Generated", "AI-Generated"]
                 )
                 st.bar_chart(chart_data, height=300)
-            
-            st.markdown("---")
-            st.markdown("### Characteristics")
-            st.write("The image below highlights regions influencing the model's prediction for *this specific image*.")
-            st.write(f"The model predicted this image is **{predicted_class_name}**.")
-            st.write("LIME explains *why* the model made that prediction:")
-
-            explained_class_name = predicted_class_name
-            other_class_name = "AI-Generated" if predicted_class_index == 0 else "Not AI-Generated"
-
-            st.write(f":green[Green areas]: Regions supporting the prediction of **'{explained_class_name}'**.")
-            st.write(f":red[Red areas]: Regions contradicting the prediction (i.e., suggesting it might be **'{other_class_name}'**).")
-
-            st.write("Segment boundaries are also shown.")
-
-            with st.spinner("Visualizing explanation..."):
-                lime_explainer = lime_image.LimeImageExplainer(random_state=42)
-                explanation = lime_explainer.explain_instance(
-                    np_image_uint8,
-                    predict_func,
-                    top_labels=2,
-                    hide_color=0,
-                    num_samples=512
-                )
-
-                temp, mask = explanation.get_image_and_mask(
-                    predicted_class_index,
-                    positive_only=False,
-                    num_features=10,
-                    hide_rest=False
-                )
-
-                if temp.dtype == np.uint8:
-                    temp_float = temp.astype(float) / 255.0
-                else:
-                    temp_float = np.clip(temp, 0.0, 1.0)
-
-                marked_image = mark_boundaries(temp_float, mask, color=(1,0,1), mode='outer')
-                st.image(marked_image, caption="LIME Explanation", use_container_width=True)
-
 ###
 ### Main
 ###
