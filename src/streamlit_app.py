@@ -137,10 +137,17 @@ def render_home():
             
             st.markdown("---")
             st.markdown("### Characteristics")
-            st.write("The image below shows the characteristics of the image that contributed to the model's prediction.")
-            st.write("Shows image regions influencing the prediction, with segment boundaries.")
-            st.write(":green[Green areas]: contribute to the fact that the image is likely to NOT be AI-generated.")
-            st.write(":red[Red areas]: contribute to the fact that the image is likely to be AI-generated.")
+            st.write("The image below highlights regions influencing the model's prediction for *this specific image*.")
+            st.write(f"The model predicted this image is **{predicted_class_name}**.")
+            st.write("LIME explains *why* the model made that prediction:")
+
+            explained_class_name = predicted_class_name
+            other_class_name = "AI-Generated" if predicted_class_index == 0 else "Not AI-Generated"
+
+            st.write(f":green[Green areas]: Regions supporting the prediction of **'{explained_class_name}'**.")
+            st.write(f":red[Red areas]: Regions contradicting the prediction (i.e., suggesting it might be **'{other_class_name}'**).")
+
+            st.write("Segment boundaries are also shown.")
 
             with st.spinner("Visualizing explanation..."):
                 lime_explainer = lime_image.LimeImageExplainer(random_state=42)
@@ -151,8 +158,6 @@ def render_home():
                     hide_color=0,
                     num_samples=512
                 )
-
-                predicted_class_index = 1 if ai_prob > non_ai_prob else 0
 
                 temp, mask = explanation.get_image_and_mask(
                     predicted_class_index,
