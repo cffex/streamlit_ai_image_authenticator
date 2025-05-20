@@ -24,27 +24,6 @@ except Exception as e:
     st.stop()
 
 ###
-### Lime predict
-###
-
-def predict_func(images: np.ndarray):
-    if images.dtype == np.uint8:
-        images = images.astype(np.float32) / 255.0
-    else:
-        images = np.clip(images, 0.0, 1.0).astype(np.float32)
-
-    predictions = []
-
-    for image in images:
-        input_data = np.expand_dims(image, axis=0).astype(np.float32)
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        interpreter.invoke()
-        prediction = interpreter.get_tensor(output_details[0]['index'])
-        predictions.append(prediction[0])
-
-    return np.array(predictions)
-
-###
 ### Streamlit app
 ###
 
